@@ -30,12 +30,12 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test with Coverage
-        run: dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test-results.trx" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura
 
       - name: Generate Coverage Report
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:TestResults/CoverageReport -reporttypes:"Html;MarkdownSummaryGithub;Cobertura" -verbosity:Info
+          reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:TestResults/CoverageReport -reporttypes:"Html;MarkdownSummaryGithub;OpenCover" -verbosity:Info
 
       - name: Publish Code Coverage Summary
         run: cat TestResults/CoverageReport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
@@ -63,6 +63,8 @@ jobs:
           name: test-and-coverage-results
           path: |
             TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+            TestResults/**/coverage.opencover.xml
             TestResults/CoverageReport/
           retention-days: 30
 
